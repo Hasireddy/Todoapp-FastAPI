@@ -57,5 +57,14 @@ async def edit_task(id:int,updated_task:Tasks):
     return "No task found"
         
             
+# Delete task using Delete request
 
+@app.delete("/task_delete/{id}")
+
+async def delete_task(id:int):
+    for i in range(len(my_tasks)):
+        if my_tasks[i].id == id:
+            del my_tasks[i]
+            return "Product deleted"
+    return "No product found"
 
