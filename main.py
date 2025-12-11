@@ -34,3 +34,28 @@ async def get_task_by_id(id:int):
         if task.id == id:
             return task
     return "Task not found"
+
+
+#Add/Create new task using POST request
+
+@app.post("/add_task")
+
+async def add_new_task(task:Tasks):
+    my_tasks.append(task)
+    return "New task added"
+
+
+# Edit data using PUT request
+
+@app.put("/edit_task/{id}")
+
+async def edit_task(id:int,updated_task:Tasks):
+    for i in range(len(my_tasks)):
+        if my_tasks[i].id == id:
+            my_tasks[i] = updated_task
+            return "Task updated successfully"
+    return "No task found"
+        
+            
+
+
