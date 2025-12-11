@@ -1,4 +1,8 @@
-def greet():
-    print("Welcome")
+from fastapi import FastAPI
 
-greet()
+app = FastAPI()
+
+@app.get("/")
+async def greet():
+    return {"message":"Welcome"}
+
