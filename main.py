@@ -1,6 +1,7 @@
 from fastapi import FastAPI, status, HTTPException
-from models import Task, TaskCreate, TaskUpdate
 from typing import List, Optional
+from models import Task, TaskCreate, TaskUpdate
+from database import session
 
 # Path - It is used to validate and document path variables (input in the URL)
 from fastapi import Path
