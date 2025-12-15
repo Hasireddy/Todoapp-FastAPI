@@ -1,7 +1,8 @@
 from fastapi import FastAPI, status, HTTPException
 from typing import List, Optional
 from models import Task, TaskCreate, TaskUpdate
-from database import session
+# from database import SessionLocal
+# from database_models import Base, engine
 
 # Path - It is used to validate and document path variables (input in the URL)
 from fastapi import Path
@@ -11,6 +12,8 @@ from fastapi import Query
 
 app = FastAPI()
 
+#Create tables in the database from the database models
+# database_models.Base.metadata.create_all(bind=engine)
 
 @app.get("/")
 async def greet():
@@ -25,6 +28,12 @@ my_tasks = [
     Task(id=5, name="Testing", status="pending"),
     Task(id=6, name="Documentation", status="pending"),
 ]
+
+# @app.get("/tasks")
+# async def get_tasks():
+#     db = Session()
+#     db.query()
+
 
 
 # Get request to fetch the data
