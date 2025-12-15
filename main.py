@@ -17,11 +17,12 @@ async def greet():
 
 
 my_tasks = [
-    Task(id=1, name="task1", status="completed"),
-    Task(id=2, name="task2", status="pending"),
-    Task(id=3, name="task3", status="pending"),
-    Task(id=4, name="task4", status="completed"),
-    Task(id=5, name="task5", status="pending"),
+    Task(id=1, name="Planning", status="completed"),
+    Task(id=2, name="Coding", status="pending"),
+    Task(id=3, name="Research", status="pending"),
+    Task(id=4, name="Meeting", status="completed"),
+    Task(id=5, name="Testing", status="pending"),
+     Task(id=6, name="Documentation", status="pending"),
 ]
 
 
@@ -29,7 +30,7 @@ my_tasks = [
 # TODO: Add query parameters for searching tasks by name -> `starts_with`
 # TODO: Add sort query param -> `sort_by=(asc(default)|desc)`
 @app.get("/tasks", response_model=List[Task])
-def get_tasks(limit: int = Query(2)):
+def get_tasks(limit: int = Query(4)):
     return my_tasks[:limit]
 
 
