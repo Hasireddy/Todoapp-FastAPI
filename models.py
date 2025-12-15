@@ -1,7 +1,8 @@
 from typing import Optional
 from pydantic import BaseModel, Field
 
-#BaseModel from Pydantic enables data validation,typechecking and automatic error messages. Everytime a task is created,Pydantic validates the data.
+
+# BaseModel from Pydantic enables data validation,typechecking and automatic error messages. Everytime a task is created,Pydantic validates the data.
 class Task(BaseModel):
     id: int
     name: Optional[str] = Field(
