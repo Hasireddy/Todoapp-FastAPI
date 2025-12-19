@@ -1,7 +1,7 @@
 from fastapi import FastAPI, status, HTTPException, Depends
 from typing import List, Optional
 from models import Task, TaskCreate, TaskUpdate
-from database import engine, get_db
+from database import engine, get_db,SessionLocal
 from database_models import TaskDB
 from sqlalchemy.orm import Session
 
@@ -12,10 +12,6 @@ from fastapi import Path
 from fastapi import Query
 
 app = FastAPI()
-
-# Create tables in the database from the database models
-TaskDB.metadata.create_all(bind=engine)
-
 
 @app.get("/")
 async def greet():
@@ -31,6 +27,22 @@ my_tasks = [
     Task(id=6, name="Documentation", status="pending"),
 ]
 
+
+
+# Create tables in the database from the database models
+TaskDB.metadata.create_all(bind=engine)
+
+
+#Inserting data into the Dtabase
+
+def init_db():
+    with SessionLocal() as db:
+        for task in my_tasks:
+            db.add(TaskDB(**task.model_dump()))
+        db.commit()
+
+init_db()
+    
 
 # Get request to fetch the data
 # Add query parameters for searching tasks by name -> `starts_with`
