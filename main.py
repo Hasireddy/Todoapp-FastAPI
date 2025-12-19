@@ -41,48 +41,50 @@ def init_db():
         if count == 0:
             for task in my_tasks:
                 db.add(TaskDB(**task.model_dump()))
-            db.commit()
-
-
-       
+            db.commit()      
 
 init_db()
-    
 
+
+#Get all the tasks from the Database
 # Get request to fetch the data
 # Add query parameters for searching tasks by name -> `starts_with`
 # Add sort query param -> `sort_by=(asc(default)|desc)`
 @app.get("/tasks", response_model=List[Task])
-async def get_tasks(
-    db: Session = Depends(get_db),
-    limit: int = Query(4, description="Maximum number of tasks to return"),
-    starts_with: Optional[str] = Query(
-        None, description="Filter tasks whose name starts with this string"
-    ),
-    sort_by: str = Query("asc", description="Sort tasks by name:'asc' or 'desc' "),
-):
-    my_tasks = db.query(TaskDB).all()
-    if limit <= 0:
-        raise HTTPException(status_code=400, detail="Limit must be greater than 0")
-    if starts_with:
-        filtered_tasks = [
-            task for task in my_tasks if task.name.startswith(starts_with)
-        ]
-        if not filtered_tasks:
-            raise HTTPException(
-                status_code=404, detail=f"No tasks found starting with '{starts_with}'"
-            )
-    # If starts with query parameter is not provided return all tasks
-    else:
-        filtered_tasks = my_tasks
+async def get_tasks(db:Session = Depends(get_db)):
+    db_tasks = db.query(TaskDB).all()
+    return db_tasks
 
-    # Validate sort_by
-    if sort_by not in ["asc", "desc"]:
-        raise HTTPException(status_code=400, detail="sort_by must be 'asc' or 'desc'")
-    # Sort tasks by name
-    filtered_tasks.sort(key=lambda t: t.name, reverse=(sort_by == "desc"))
+# async def get_tasks(
+#     db: Session = Depends(get_db),
+#     limit: int = Query(4, description="Maximum number of tasks to return"),
+#     starts_with: Optional[str] = Query(
+#         None, description="Filter tasks whose name starts with this string"
+#     ),
+#     sort_by: str = Query("asc", description="Sort tasks by name:'asc' or 'desc' "),
+# ):
+#     my_tasks = db.query(TaskDB).all()
+#     if limit <= 0:
+#         raise HTTPException(status_code=400, detail="Limit must be greater than 0")
+#     if starts_with:
+#         filtered_tasks = [
+#             task for task in my_tasks if task.name.startswith(starts_with)
+#         ]
+#         if not filtered_tasks:
+#             raise HTTPException(
+#                 status_code=404, detail=f"No tasks found starting with '{starts_with}'"
+#             )
+#     # If starts with query parameter is not provided return all tasks
+#     else:
+#         filtered_tasks = my_tasks
 
-    return filtered_tasks[:limit]
+#     # Validate sort_by
+#     if sort_by not in ["asc", "desc"]:
+#         raise HTTPException(status_code=400, detail="sort_by must be 'asc' or 'desc'")
+#     # Sort tasks by name
+#     filtered_tasks.sort(key=lambda t: t.name, reverse=(sort_by == "desc"))
+
+#     return filtered_tasks[:limit]
 
 
 # Get tasks by id
