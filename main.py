@@ -37,9 +37,14 @@ TaskDB.metadata.create_all(bind=engine)
 
 def init_db():
     with SessionLocal() as db:
-        for task in my_tasks:
-            db.add(TaskDB(**task.model_dump()))
-        db.commit()
+        count = db.query(TaskDB).count()
+        if count == 0:
+            for task in my_tasks:
+                db.add(TaskDB(**task.model_dump()))
+            db.commit()
+
+
+       
 
 init_db()
     
