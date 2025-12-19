@@ -8,7 +8,7 @@ class Task(BaseModel):
     name: Optional[str] = Field(
         min_length=5,
         max_length=20,
-        pattern="^[A-Za-z]+$",
+        pattern="^[A-Za-z].*$",
         description="Description of the task to be performed.",
     )
     status: str = Field(pattern="^(pending|in progress|completed)$")

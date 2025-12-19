@@ -1,8 +1,9 @@
-from fastapi import FastAPI, status, HTTPException
+from fastapi import FastAPI, status, HTTPException, Depends
 from typing import List, Optional
 from models import Task, TaskCreate, TaskUpdate
-from database import engine
+from database import engine, get_db
 from database_models import TaskDB
+from sqlalchemy.orm import Session
 
 # Path - It is used to validate and document path variables (input in the URL)
 from fastapi import Path
@@ -12,8 +13,9 @@ from fastapi import Query
 
 app = FastAPI()
 
-#Create tables in the database from the database models
-db = TaskDB.metadata.create_all(bind=engine)
+# Create tables in the database from the database models
+TaskDB.metadata.create_all(bind=engine)
+
 
 @app.get("/")
 async def greet():
@@ -29,26 +31,20 @@ my_tasks = [
     Task(id=6, name="Documentation", status="pending"),
 ]
 
-# @app.get("/tasks")
-# async def get_tasks():
-#     db = Session()
-#     db.query()
-
-
 
 # Get request to fetch the data
 # Add query parameters for searching tasks by name -> `starts_with`
 # Add sort query param -> `sort_by=(asc(default)|desc)`
-
-
 @app.get("/tasks", response_model=List[Task])
 async def get_tasks(
+    db: Session = Depends(get_db),
     limit: int = Query(4, description="Maximum number of tasks to return"),
     starts_with: Optional[str] = Query(
         None, description="Filter tasks whose name starts with this string"
     ),
     sort_by: str = Query("asc", description="Sort tasks by name:'asc' or 'desc' "),
 ):
+    my_tasks = db.query(TaskDB).all()
     if limit <= 0:
         raise HTTPException(status_code=400, detail="Limit must be greater than 0")
     if starts_with:
@@ -73,6 +69,7 @@ async def get_tasks(
 
 
 # Get tasks by id
+# TODO: Use DB object
 @app.get("/task/{id}", response_model=Task)
 async def get_task_by_id(id: int = Path(gt=0)):
     for task in my_tasks:
@@ -83,12 +80,16 @@ async def get_task_by_id(id: int = Path(gt=0)):
 
 # Add/Create new task using POST request
 @app.post("/add_task", response_model=Task, status_code=status.HTTP_201_CREATED)
-async def add_new_task(task: TaskCreate):
-    my_tasks.append(task)
-    return task
+async def add_new_task(task: TaskCreate, db: Session = Depends(get_db)):
+    db_task = TaskDB(id=task.id, name=task.name, status=task.status)
+    db.add(db_task)
+    db.commit()
+    db.refresh(db_task)
+    return db_task
 
 
 # Edit data using PUT request
+# TODO: Use DB object
 @app.put("/edit_task/{id}", response_model=Task)
 async def edit_task(id: int, updated_task: TaskUpdate):
     for i in range(len(my_tasks)):
@@ -101,6 +102,7 @@ async def edit_task(id: int, updated_task: TaskUpdate):
 
 
 # Delete task using Delete request
+# TODO: Use DB object
 @app.delete("/task_delete/{id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_task(id: int):
     for i in range(len(my_tasks)):
