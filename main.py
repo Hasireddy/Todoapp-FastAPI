@@ -1,4 +1,4 @@
-from fastapi import FastAPI, status, HTTPException, Depends
+from fastapi import FastAPI, status, HTTPException, Depends,Response
 from typing import List, Optional
 from models import Task, TaskCreate, TaskUpdate
 from database import engine, get_db,SessionLocal
@@ -142,9 +142,18 @@ async def update_task(id:int,updated_task:TaskUpdate,db: Session = Depends(get_d
 # Delete task using Delete request
 # TODO: Use DB object
 @app.delete("/task_delete/{id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_task(id: int):
-    for i in range(len(my_tasks)):
-        if my_tasks[i].id == id:
-            del my_tasks[i]
-            return "Product deleted"
-    raise HTTPException(status_code=404, detail="Task not found!")
+# async def delete_task(id: int):
+#     for i in range(len(my_tasks)):
+#         if my_tasks[i].id == id:
+#             del my_tasks[i]
+#             return "Product deleted"
+#     raise HTTPException(status_code=404, detail="Task not found!")
+async def delete_task(id:int,db:Session = Depends(get_db)):
+    db_task = db.query(TaskDB).filter(TaskDB.id == id).first()
+    if db_task:
+        db.delete(db_task)
+        db.commit()
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
+    else:
+        raise HTTPException(status_code=404,detail="Task not found")
+
