@@ -1,4 +1,4 @@
-from fastapi import FastAPI, status, HTTPException, Depends
+from fastapi import FastAPI, status, HTTPException, Depends,Response
 from typing import List, Optional
 from models import Task, TaskCreate, TaskUpdate
 from database import engine, get_db,SessionLocal
@@ -90,15 +90,24 @@ async def get_tasks(db:Session = Depends(get_db)):
 # Get tasks by id
 # TODO: Use DB object
 @app.get("/task/{id}", response_model=Task)
-async def get_task_by_id(id: int = Path(gt=0)):
-    for task in my_tasks:
-        if task.id == id:
-            return task
-    raise HTTPException(status_code=404, detail="Task not found!")
+# async def get_task_by_id(id: int = Path(gt=0)):
+#     for task in my_tasks:
+#         if task.id == id:
+#             return task
+#     raise HTTPException(status_code=404, detail="Task not found!")
+async def get_task_by_id(id:int,db:Session = Depends(get_db)):
+    db_task = db.query(TaskDB).filter(TaskDB.id == id).first()
+    if db_task:
+        return db_task
+    raise HTTPException(status_code=404,detail="Task not found")
+
 
 
 # Add/Create new task using POST request
 @app.post("/add_task", response_model=Task, status_code=status.HTTP_201_CREATED)
+# async def add_new_task(task:TaskCreate):
+#     my_tasks.append(task)
+#     return task
 async def add_new_task(task: TaskCreate, db: Session = Depends(get_db)):
     db_task = TaskDB(id=task.id, name=task.name, status=task.status)
     db.add(db_task)
@@ -110,22 +119,41 @@ async def add_new_task(task: TaskCreate, db: Session = Depends(get_db)):
 # Edit data using PUT request
 # TODO: Use DB object
 @app.put("/edit_task/{id}", response_model=Task)
-async def edit_task(id: int, updated_task: TaskUpdate):
-    for i in range(len(my_tasks)):
-        if my_tasks[i].id == id:
-            my_tasks[i].name = updated_task.name
-            my_tasks[i].status = updated_task.status
-            return my_tasks[i]
+# async def edit_task(id: int, updated_task: TaskUpdate):
+#     for i in range(len(my_tasks)):
+#         if my_tasks[i].id == id:
+#             my_tasks[i].name = updated_task.name
+#             my_tasks[i].status = updated_task.status
+#             return my_tasks[i]
 
-    raise HTTPException(status_code=404, detail="Task not found!")
+#     raise HTTPException(status_code=404, detail="Task not found!")
+async def update_task(id:int,updated_task:TaskUpdate,db: Session = Depends(get_db)):
+    db_task = db.query(TaskDB).filter(TaskDB.id == id).first()
+    if db_task:
+        db_task.name = updated_task.name
+        db_task.status = updated_task.status
+        db.commit()
+        db.refresh(db_task)
+        return db_task
+    else:
+        raise HTTPException(status_code=404, detail="Task not found!")
 
 
 # Delete task using Delete request
 # TODO: Use DB object
 @app.delete("/task_delete/{id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_task(id: int):
-    for i in range(len(my_tasks)):
-        if my_tasks[i].id == id:
-            del my_tasks[i]
-            return "Product deleted"
-    raise HTTPException(status_code=404, detail="Task not found!")
+# async def delete_task(id: int):
+#     for i in range(len(my_tasks)):
+#         if my_tasks[i].id == id:
+#             del my_tasks[i]
+#             return "Product deleted"
+#     raise HTTPException(status_code=404, detail="Task not found!")
+async def delete_task(id:int,db:Session = Depends(get_db)):
+    db_task = db.query(TaskDB).filter(TaskDB.id == id).first()
+    if db_task:
+        db.delete(db_task)
+        db.commit()
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
+    else:
+        raise HTTPException(status_code=404,detail="Task not found")
+
