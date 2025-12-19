@@ -90,11 +90,17 @@ async def get_tasks(db:Session = Depends(get_db)):
 # Get tasks by id
 # TODO: Use DB object
 @app.get("/task/{id}", response_model=Task)
-async def get_task_by_id(id: int = Path(gt=0)):
-    for task in my_tasks:
-        if task.id == id:
-            return task
-    raise HTTPException(status_code=404, detail="Task not found!")
+# async def get_task_by_id(id: int = Path(gt=0)):
+#     for task in my_tasks:
+#         if task.id == id:
+#             return task
+#     raise HTTPException(status_code=404, detail="Task not found!")
+async def get_task_by_id(id:int,db:Session = Depends(get_db)):
+    db_task = db.query(TaskDB).filter(TaskDB.id == id).first()
+    if db_task:
+        return db_task
+    raise HTTPException(status_code=404,detail="Task not found")
+
 
 
 # Add/Create new task using POST request
