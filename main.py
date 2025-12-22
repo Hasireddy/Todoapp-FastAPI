@@ -1,5 +1,7 @@
 from fastapi import FastAPI, status, HTTPException, Depends, Response, Path, Query
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
+
 from sqlalchemy.orm import Session
 from sqlalchemy import asc, desc
 from typing import List, Optional
@@ -19,6 +21,17 @@ app = FastAPI(
     title="Todo App API",
     description="A secure Todo application with JWT authentication and user-task relationships",
 )
+
+# CORS Configuration - Allow frontend to access the API
+# NOTE: For production, replace "*" with specific origins like ["https://yourdomain.com"]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins (use specific origins in production)
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods (GET, POST, PUT, DELETE, etc.)
+    allow_headers=["*"],  # Allows all headers (including Authorization)
+)
+
 
 
 # Create all tables in the database
