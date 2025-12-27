@@ -9,7 +9,7 @@ from typing import Generator
 
 #db_url = "sqlite:///./tasks.db"
 db_url = "postgresql://postgres:root@localhost:5432/tasks"
-engine = create_engine(db_url, connect_args={"check_same_thread": False})
+engine = create_engine(db_url)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
