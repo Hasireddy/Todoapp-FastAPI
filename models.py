@@ -10,6 +10,7 @@ class UserBase(BaseModel):
     """Base user model with common fields."""
 
     username: str = Field(
+        ...,
         min_length=3,
         max_length=50,
         pattern="^[a-zA-Z0-9_]+$",
@@ -21,6 +22,7 @@ class UserCreate(UserBase):
     """Model for creating a new user."""
 
     password: str = Field(
+        ...,
         min_length=6, max_length=100, description="Password (minimum 6 characters)"
     )
     role: str = Field(
