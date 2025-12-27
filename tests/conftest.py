@@ -11,7 +11,8 @@ from typing import Generator
 
 from main import app
 from database import get_db
-from database_models import Base
+from database_models import Base, UserDB, TaskDB
+from auth import hash_password
 
 
 
@@ -62,12 +63,69 @@ def client(db_session):
     client = TestClient(app)
     yield client
 
-
-# Create a fixture -> test_user
-# It will create a test user and save it in your DB so that we can use it for login workflows
-# Depends on db_session fixture
+    # Cleanup
+    app.dependency_overrides.clear()
 
 
+@pytest.fixture
+def test_user(db_session):
+    """Create a test user in the database."""
+    user = UserDB(
+        username="testuser",
+        hashed_password=hash_password("testpass123"),
+        role="user"
+    )
+    db_session.add(user)
+    db_session.commit()
+    db_session.refresh(user)
+    return user
 
 
+@pytest.fixture
+def test_admin(db_session):
+    """Create a test admin user."""
+    admin = UserDB(
+        username="testadmin",
+        hashed_password=hash_password("adminpass123"),
+        role="admin"
+    )
+    db_session.add(admin)
+    db_session.commit()
+    db_session.refresh(admin)
+    return admin
 
+
+@pytest.fixture
+def auth_headers(client, test_user):
+    """Get authentication headers for a regular user."""
+    response = client.post(
+        "/token",
+        data={"username": "testuser", "password": "testpass123"}
+    )
+    token = response.json()["access_token"]
+    return {"Authorization": f"Bearer {token}"}
+
+
+@pytest.fixture
+def admin_headers(client, test_admin):
+    """Get authentication headers for an admin user."""
+    response = client.post(
+        "/token",
+        data={"username": "testadmin", "password": "adminpass123"}
+    )
+    token = response.json()["access_token"]
+    return {"Authorization": f"Bearer {token}"}
+
+
+@pytest.fixture
+def sample_task(db_session, test_user):
+    """Create a sample task for testing."""
+    task = TaskDB(
+        name="Test Task",
+        status="pending",
+        user_id=test_user.id
+    )
+    db_session.add(task)
+    db_session.commit()
+    db_session.refresh(task)
+    return task

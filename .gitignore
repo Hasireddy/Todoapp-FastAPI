@@ -1,6 +1,7 @@
 # BACKEND
 __pycache__
 tasks.db
+.coverage
 
 # FRONTEND
 frontend/logs
@@ -10,6 +11,7 @@ frontend/yarn-debug.log*
 frontend/yarn-error.log*
 frontend/pnpm-debug.log*
 frontend/lerna-debug.log*
+frontend/.vite
 
 frontend/node_modules
 frontend/dist
